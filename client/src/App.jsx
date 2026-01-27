@@ -2,6 +2,8 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import TaskFormPage from './pages/TaskFormPage'
+import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
 import './pages/auth.css'
 
@@ -31,6 +33,8 @@ export default function App() {
       {/* Protected routes: any Route nested here will require authentication */}
       <Route element={<ProtectedRoute />}>
         <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/tasks/new" element={<TaskFormPage />} />
+        <Route path="/tasks/:id/edit" element={<TaskFormPage />} />
       </Route>
       {/* Redirect default -> tasks (protected); fallback redirects to root */}
       <Route path="/" element={<Navigate to="/tasks" replace />} />

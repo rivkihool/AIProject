@@ -62,6 +62,19 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  // Listen for centralized 'unauthorized' events (dispatched by axios instance)
+  // When a 401 occurs we perform the same logout flow so the app returns to login state.
+  useEffect(() => {
+    function handleUnauthorized() {
+      // Optionally show a message here or fire additional UI actions
+      // then call logout to clear auth state and storage
+      logout()
+    }
+
+    window.addEventListener('unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('unauthorized', handleUnauthorized)
+  }, [/* no deps except logout intentionally omitted to keep handler stable */])
+
   const value = useMemo(
     () => ({ token, user, isAuthenticated, login, logout }),
     [token, user, isAuthenticated]

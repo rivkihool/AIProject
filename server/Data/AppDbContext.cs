@@ -7,6 +7,6 @@ namespace Server.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<User> Users => Set<User>();
     }
 }

@@ -36,9 +36,11 @@ export default function LoginPage() {
 
     setIsSubmitting(true)
     try {
-      const resp = await axios.post('/api/auth/login', { email, password })
+      const resp = await axios.post('/auth/login', { email, password })
+      console.log('Login response:', resp.data) // Debug log
       const { token, user } = resp.data || {}
       if (!token || !user) {
+        console.error('Missing token or user in response:', { token, user })
         setError('Login failed. Please try again.')
         return
       }
@@ -47,8 +49,29 @@ export default function LoginPage() {
       // redirect to tasks
       navigate('/tasks')
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message)
+      // Log error details for debugging (without sensitive data)
+      console.error('[LoginPage] Login error:', {
+        message: err.message,
+        code: err.code,
+        status: err.response?.status,
+        url: err.config?.url
+      })
+
+      if (err.response && err.response.data) {
+        const { message, errors } = err.response.data
+        if (errors && Array.isArray(errors) && errors.length > 0) {
+          setError(errors.join(', '))
+        } else if (message) {
+          setError(message)
+        } else {
+          setError('Login failed. Please try again.')
+        }
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Cannot connect to server. Please check your internet connection.')
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Request timed out. Please try again.')
+      } else if (err.message) {
+        setError('Connection error. Please try again.')
       } else {
         setError('Login failed. Please try again.')
       }

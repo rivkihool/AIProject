@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Login API Test</h1>
+    <button onclick="testRegister()">Test Register</button>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="output"></pre>
+
+    <script>
+        const output = document.getElementById('output');
+
+        async function testRegister() {
+            output.textContent = 'Testing registration...\n';
+            try {
+                const response = await fetch('http://localhost:5228/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        password: 'test123456'
+                    })
+                });
+                
+                const data = await response.json();
+                output.textContent += `Status: ${response.status}\n`;
+                output.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+            } catch (error) {
+                output.textContent += `Error: ${error.message}\n`;
+                output.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+
+        async function testLogin() {
+            output.textContent = 'Testing login...\n';
+            try {
+                const response = await fetch('http://localhost:5228/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'test123456'
+                    })
+                });
+                
+                const data = await response.json();
+                output.textContent += `Status: ${response.status}\n`;
+                output.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+            } catch (error) {
+                output.textContent += `Error: ${error.message}\n`;
+                output.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+    </script>
+</body>
+</html>

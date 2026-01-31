@@ -7,7 +7,7 @@ import './auth.css'
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -16,12 +16,15 @@ export default function RegisterPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
 
-  // validation: require full name, email format, and password
+  // validation: require name, email format, and password
   function validate() {
-    if (!fullName) return 'Full name is required'
+    if (!name) return 'Name is required'
+    if (name.length < 2) return 'Name must be at least 2 characters'
+    if (name.length > 100) return 'Name must be 100 characters or less'
     if (!email) return 'Email is required'
     if (!emailRegex.test(email)) return 'Please enter a valid email address'
     if (!password) return 'Password is required'
+    if (password.length < 6) return 'Password must be at least 6 characters'
     return null
   }
 
@@ -38,7 +41,7 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const resp = await axios.post('/api/auth/register', { fullName, email, password })
+      const resp = await axios.post('/auth/register', { name, email, password })
       const { token, user } = resp.data || {}
       if (!token || !user) {
         setError('Registration failed. Please try again.')
@@ -48,8 +51,29 @@ export default function RegisterPage() {
       login(token, user)
       navigate('/tasks')
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message)
+      // Log error details for debugging (without sensitive data)
+      console.error('[RegisterPage] Registration error:', {
+        message: err.message,
+        code: err.code,
+        status: err.response?.status,
+        url: err.config?.url
+      })
+
+      if (err.response && err.response.data) {
+        const { message, errors } = err.response.data
+        if (errors && Array.isArray(errors) && errors.length > 0) {
+          setError(errors.join(', '))
+        } else if (message) {
+          setError(message)
+        } else {
+          setError('Registration failed. Please try again.')
+        }
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Cannot connect to server. Please check your internet connection.')
+      } else if (err.code === 'ECONNABORTED') {
+        setError('Request timed out. Please try again.')
+      } else if (err.message) {
+        setError('Connection error. Please try again.')
       } else {
         setError('Registration failed. Please try again.')
       }
@@ -65,13 +89,13 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} noValidate className="auth-form">
           <label>
-            Full name
+            Name
             <input
               className="auth-input"
               type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
               required
             />
           </label>
